@@ -20,8 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     nodejs=18.* \
     npm=9.2.* \
     rsync=3.2.* \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+    && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user for running the GitHub Actions runner
 RUN useradd -m -u 1000 runner

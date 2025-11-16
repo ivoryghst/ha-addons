@@ -129,7 +129,7 @@ REPO_URL=$(trim_whitespace "$REPO_URL")
 REPO_URL="${REPO_URL%/}"
 
 # Validate repository URL format
-if [[ ! "$REPO_URL" =~ ^https://github\.com/[a-zA-Z0-9_-]+(/[a-zA-Z0-9_.-]+)?$ ]]; then
+if [[ ! "$REPO_URL" =~ ^https://github\.com/[a-zA-Z0-9_-]+(/[a-zA-Z0-9_-]+)?$ ]]; then
     bashio::log.fatal "Invalid repository URL format!"
     bashio::log.fatal "Expected format:"
     bashio::log.fatal "  - For repository: https://github.com/owner/repo"
