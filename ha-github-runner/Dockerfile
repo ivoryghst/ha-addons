@@ -50,12 +50,18 @@ RUN set -e && \
     RUNNER_URL="https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz" && \
     curl -sSfL -o actions-runner.tar.gz "${RUNNER_URL}" && \
     # Extract checksum from release notes
-    EXPECTED_CHECKSUM=$(curl -sSf https://api.github.com/repos/actions/runner/releases/tags/v${RUNNER_VERSION} | \
+    RELEASE_NOTES=$(curl -sSf https://api.github.com/repos/actions/runner/releases/tags/v${RUNNER_VERSION}) || { \
+        echo "Error: Failed to fetch release notes from GitHub API. Possible network issue or rate limiting." >&2; \
+        exit 1; \
+    } && \
+    EXPECTED_CHECKSUM=$(echo "$RELEASE_NOTES" | \
         jq -r '.body' | \
         grep "actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz" | \
         grep -oP '(?<=<!-- BEGIN SHA linux-'${RUNNER_ARCH}' -->)[a-f0-9]{64}(?=<!-- END SHA linux-'${RUNNER_ARCH}' -->)') && \
     if [ -z "$EXPECTED_CHECKSUM" ]; then \
-        echo "Warning: Could not extract checksum from release notes, skipping verification" >&2; \
+        echo "Error: Could not extract checksum from release notes for actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz." >&2; \
+        echo "This may be due to a change in the release notes format. Please check https://github.com/actions/runner/releases/tag/v${RUNNER_VERSION} for the correct checksum and update the extraction logic if necessary." >&2; \
+        exit 1; \
     elif command -v sha256sum >/dev/null 2>&1; then \
         echo "Verifying checksum..." && \
         ACTUAL_CHECKSUM=$(sha256sum actions-runner.tar.gz | awk '{print $1}') && \
