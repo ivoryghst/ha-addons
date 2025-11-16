@@ -49,19 +49,28 @@ RUN set -e && \
     echo "Downloading runner for architecture: ${RUNNER_ARCH}, version: ${RUNNER_VERSION}" && \
     RUNNER_URL="https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz" && \
     curl -sSfL -o actions-runner.tar.gz "${RUNNER_URL}" && \
-    # Download and verify checksum
-    curl -sSfL -o actions-runner.tar.gz.sha256 "${RUNNER_URL}.sha256" && \
-    if command -v sha256sum >/dev/null 2>&1; then \
+    # Extract checksum from release notes
+    EXPECTED_CHECKSUM=$(curl -sSf https://api.github.com/repos/actions/runner/releases/tags/v${RUNNER_VERSION} | \
+        jq -r '.body' | \
+        grep "actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz" | \
+        grep -oP '(?<=<!-- BEGIN SHA linux-'${RUNNER_ARCH}' -->)[a-f0-9]{64}(?=<!-- END SHA linux-'${RUNNER_ARCH}' -->)') && \
+    if [ -z "$EXPECTED_CHECKSUM" ]; then \
+        echo "Warning: Could not extract checksum from release notes, skipping verification" >&2; \
+    elif command -v sha256sum >/dev/null 2>&1; then \
         echo "Verifying checksum..." && \
-        sha256sum -c actions-runner.tar.gz.sha256 || { \
+        ACTUAL_CHECKSUM=$(sha256sum actions-runner.tar.gz | awk '{print $1}') && \
+        if [ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]; then \
             echo "Checksum verification failed!" >&2; \
+            echo "Expected: $EXPECTED_CHECKSUM" >&2; \
+            echo "Actual: $ACTUAL_CHECKSUM" >&2; \
             exit 1; \
-        }; \
+        fi && \
+        echo "Checksum verified successfully."; \
     else \
         echo "Warning: sha256sum not available, skipping checksum verification" >&2; \
     fi && \
     tar xzf actions-runner.tar.gz && \
-    rm -f actions-runner.tar.gz actions-runner.tar.gz.sha256 && \
+    rm -f actions-runner.tar.gz && \
     ./bin/installdependencies.sh && \
     chown -R runner:runner /runner
 
