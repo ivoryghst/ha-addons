@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.8.1] - 2025-11-28
+- Fixed GitHub Actions runner download by extracting checksums from API release notes
+- Removed attempt to download non-existent .sha256 checksum files (fixes 404 errors)
+- Enhanced error handling for GitHub API failures with detailed guidance
+
 ## [1.8.0] - 2025-11-15
 - Added checksum verification for GitHub runner downloads for improved security
 - Improved error handling with retry logic and exponential backoff for API calls
