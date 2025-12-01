@@ -6,10 +6,9 @@ bashio::log.info "Starting GitHub Actions Runner..."
 # PID of the runner process
 RUNNER_PID=""
 
-# Ensure /addon_configs exists and is writable
-# This directory is mounted by Home Assistant when addon_configs:rw is in config.yaml
+# Ensure /addon_configs is writable when mounted by Home Assistant
+# This directory is automatically mounted by Home Assistant when addon_configs:rw is in config.yaml
 if [ -d "/addon_configs" ]; then
-    bashio::log.info "Found /addon_configs mount point"
     # Try to set permissions to 775 (owner+group can write, others can read)
     # If that fails, fall back to 777 (all can write)
     if chmod 775 /addon_configs 2>/dev/null; then
@@ -17,12 +16,9 @@ if [ -d "/addon_configs" ]; then
     elif chmod 777 /addon_configs 2>/dev/null; then
         bashio::log.warning "Set /addon_configs permissions to 777 (world writable)"
     else
-        bashio::log.warning "Could not set permissions on /addon_configs (may already be correct)"
+        bashio::log.info "Could not modify /addon_configs permissions (may already be correct)"
     fi
-    bashio::log.info "Current /addon_configs permissions: $(stat -c '%a' /addon_configs 2>/dev/null || echo 'unknown')"
-else
-    bashio::log.warning "/addon_configs directory not found - this may indicate the addon_configs:rw mapping in config.yaml is not configured correctly in Home Assistant"
-    bashio::log.warning "Workflows attempting to use /addon_configs will fail"
+    bashio::log.info "/addon_configs is ready (permissions: $(stat -c '%a' /addon_configs 2>/dev/null || echo 'unknown'))"
 fi
 
 # Graceful shutdown handler
