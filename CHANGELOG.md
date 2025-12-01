@@ -1,9 +1,10 @@
 # Changelog
 
 ## [1.8.2] - 2025-12-01
-- Fixed /addon_configs write permission issue by changing mapping from `all_addon_configs:rw` to `addon_configs:rw`
+- Fixed /addon_configs write permission issue by reverting mapping from `all_addon_configs:rw` back to `addon_configs:rw`
 - This resolves the "Cannot write to /addon_configs" error when workflows try to write to the directory
-- The `addon_configs:rw` mapping provides the correct permissions for the runner user to write to /addon_configs
+- The `addon_configs:rw` mapping is the correct Home Assistant mapping for this addon's config directory
+- Note: Version 1.6.7 incorrectly changed to `all_addon_configs:rw` - this version corrects that mistake
 
 ## [1.8.1] - 2025-11-28
 - Fixed GitHub Actions runner download by extracting checksums from API release notes
