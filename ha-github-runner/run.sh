@@ -6,23 +6,8 @@ bashio::log.info "Starting GitHub Actions Runner..."
 # PID of the runner process
 RUNNER_PID=""
 
-# Ensure /addon_configs exists and is writable
-# This directory should be automatically mounted by Home Assistant when addon_configs:rw is in config.yaml
-# If it doesn't exist, create it to allow workflows to use it
-if [ ! -d "/addon_configs" ]; then
-    bashio::log.info "Creating /addon_configs directory..."
-    mkdir_error=$(mkdir -p /addon_configs 2>&1)
-    mkdir_exit_code=$?
-    if [ $mkdir_exit_code -eq 0 ]; then
-        bashio::log.info "Created /addon_configs directory"
-    else
-        bashio::log.error "Failed to create /addon_configs directory: ${mkdir_error}"
-        bashio::log.error "This may indicate the addon_configs:rw mapping in config.yaml is not working correctly"
-        bashio::log.error "Please ensure the addon has proper permissions in Home Assistant"
-    fi
-fi
-
-# Set proper permissions on /addon_configs
+# Ensure /addon_configs is writable when mounted by Home Assistant
+# Home Assistant mounts all_addon_configs:rw at /addon_configs
 if [ -d "/addon_configs" ]; then
     # Try to set permissions to 775 (owner+group can write, others can read)
     # If that fails, fall back to 777 (all can write)

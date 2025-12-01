@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.5] - 2025-12-01
+- **CRITICAL FIX**: Reverted mapping back to `all_addon_configs:rw` (was working in 1.7.1)
+- Version 1.8.2 incorrectly changed to `addon_configs:rw` which prevented Home Assistant from mounting the directory
+- Home Assistant mounts `all_addon_configs:rw` at the `/addon_configs` path, not `addon_configs:rw`
+- Removed directory creation code since Home Assistant now properly mounts the directory
+- This restores the working configuration from version 1.7.1
+
 ## [1.8.4] - 2025-12-01
 - Fixed permission denied error when workflows try to use /addon_configs
 - Added automatic creation of /addon_configs directory if it doesn't exist
