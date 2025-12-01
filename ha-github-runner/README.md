@@ -84,7 +84,7 @@ debug_logging: false
 
 ## Security Considerations
 
-This addon runs without AppArmor restrictions to allow GitHub Actions workflows to access the `/addon_configs` directory. This directory is mounted by Home Assistant when using the `all_addon_configs:rw` mapping, and workflows need to write persistent configuration data through this path.
+This addon runs without AppArmor restrictions to allow GitHub Actions workflows to access the `/addon_configs` directory. This directory is mounted by Home Assistant when using the `addon_configs:rw` mapping, and workflows need to write persistent configuration data through this path.
 
 **Important**: GitHub Actions runners inherently execute arbitrary code from your workflows. Only use this addon with repositories you trust, and ensure your workflows come from trusted sources. The reduced container isolation aligns with the expected security model of self-hosted runners.
 
@@ -149,7 +149,7 @@ The `/addon_configs` directory is available for storing persistent configuration
 **Permission Denied When Writing to /addon_configs**
 - The add-on automatically sets permissions on `/addon_configs` at startup (version 1.6.6+)
 - Check the add-on logs to verify `/addon_configs` mount point was found
-- The mapping `all_addon_configs:rw` is pre-configured in the add-on and should work automatically
+- The mapping `addon_configs:rw` is pre-configured in the add-on and should work automatically
 - If the mount point is not found in logs, try restarting the add-on
 - The directory should be accessible at `/addon_configs` from within your workflows
 
