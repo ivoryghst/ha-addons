@@ -7,7 +7,7 @@ bashio::log.info "Starting GitHub Actions Runner..."
 RUNNER_PID=""
 
 # Ensure /addon_configs is writable when mounted by Home Assistant
-# This directory is automatically mounted by Home Assistant when addon_configs:rw is in config.yaml
+# Home Assistant mounts all_addon_configs:rw at /addon_configs
 if [ -d "/addon_configs" ]; then
     # Try to set permissions to 775 (owner+group can write, others can read)
     # If that fails, fall back to 777 (all can write)
