@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.8.3] - 2025-12-01
+- Removed misleading /addon_configs warning that appeared even when directory was correctly mounted
+- Simplified /addon_configs logging to reduce noise in startup logs
+
 ## [1.8.2] - 2025-12-01
 - Fixed /addon_configs write permission issue by reverting mapping from `all_addon_configs:rw` back to `addon_configs:rw`
 - This resolves the "Cannot write to /addon_configs" error when workflows try to write to the directory
