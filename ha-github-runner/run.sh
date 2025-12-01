@@ -16,7 +16,7 @@ if [ -d "/addon_configs" ]; then
     elif chmod 777 /addon_configs 2>/dev/null; then
         bashio::log.warning "Set /addon_configs permissions to 777 (world writable)"
     else
-        bashio::log.info "Permissions on /addon_configs already configured"
+        bashio::log.info "Could not modify /addon_configs permissions (may already be correct)"
     fi
     bashio::log.info "/addon_configs is ready (permissions: $(stat -c '%a' /addon_configs 2>/dev/null || echo 'unknown'))"
 fi
