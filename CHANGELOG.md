@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.8.4] - 2025-12-01
+- Fixed permission denied error when workflows try to use /addon_configs
+- Added automatic creation of /addon_configs directory if it doesn't exist
+- This fixes regression from 1.8.3 where directory creation was removed
+- Ensures workflows can successfully write to /addon_configs even if Home Assistant doesn't mount it initially
+
 ## [1.8.3] - 2025-12-01
 - Removed misleading /addon_configs warning that appeared even when directory was correctly mounted
 - Simplified /addon_configs logging to reduce noise in startup logs
