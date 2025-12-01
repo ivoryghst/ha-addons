@@ -1,5 +1,5 @@
 name: HA GitHub Runner
-version: "1.8.1"
+version: "1.8.2"
 slug: ha-github-runner
 description: >-
   Self-hosted GitHub Actions runner for Home Assistant
@@ -21,7 +21,7 @@ panel_icon: mdi:github
 map:
   - timezone:ro
   - share:rw
-  - all_addon_configs:rw
+  - addon_configs:rw
 options:
   repo_url: ""
   runner_token: ""

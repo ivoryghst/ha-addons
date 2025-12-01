@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.8.2] - 2025-12-01
+- Fixed /addon_configs write permission issue by changing mapping from `all_addon_configs:rw` to `addon_configs:rw`
+- This resolves the "Cannot write to /addon_configs" error when workflows try to write to the directory
+- The `addon_configs:rw` mapping provides the correct permissions for the runner user to write to /addon_configs
+
 ## [1.8.1] - 2025-11-28
 - Fixed GitHub Actions runner download by extracting checksums from API release notes
 - Removed attempt to download non-existent .sha256 checksum files (fixes 404 errors)
