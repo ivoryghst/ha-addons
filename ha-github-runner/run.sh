@@ -11,12 +11,12 @@ RUNNER_PID=""
 # If it doesn't exist, create it to allow workflows to use it
 if [ ! -d "/addon_configs" ]; then
     bashio::log.info "Creating /addon_configs directory..."
-    mkdir_output=$(mkdir -p /addon_configs 2>&1)
+    mkdir_error=$(mkdir -p /addon_configs 2>&1)
     mkdir_exit_code=$?
     if [ $mkdir_exit_code -eq 0 ]; then
         bashio::log.info "Created /addon_configs directory"
     else
-        bashio::log.error "Failed to create /addon_configs directory: ${mkdir_output}"
+        bashio::log.error "Failed to create /addon_configs directory: ${mkdir_error}"
         bashio::log.error "This may indicate the addon_configs:rw mapping in config.yaml is not working correctly"
         bashio::log.error "Please ensure the addon has proper permissions in Home Assistant"
     fi
