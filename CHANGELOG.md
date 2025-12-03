@@ -6,8 +6,10 @@
 - This resolves "Cannot write to /addon_configs" errors when directory is mounted as root:root (775 permissions)
 - Added comprehensive diagnostics: logs before/after state and verifies runner write access
 - Enhanced error handling with fallback to 777 permissions if chown fails
+- Fixed permission handling logic: chmod 775 only applies after successful chown, preventing override of 777 fallback
+- Improved user context verification using `su -s /bin/sh` for reliable write permission testing
 - **Key difference from previous attempts**: Previous versions only used `chmod` which didn't work when directory was owned by root. This version uses `chown` to transfer ownership to the runner user.
-- **Why this won't revert**: The mapping `all_addon_configs:rw` is correct and unchanged. The ownership change is the missing piece that makes it work.
+- **Why this won't revert**: The mapping `all_addon_configs:rw` is correct and unchanged. The ownership change is the missing piece that makes it work. The container runs the startup script as root (default), allowing chown to succeed without requiring privileged mode.
 
 ## [1.8.5] - 2025-12-01
 - **CRITICAL FIX**: Reverted mapping back to `all_addon_configs:rw` (was working in 1.7.1)

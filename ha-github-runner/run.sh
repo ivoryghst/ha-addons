@@ -18,11 +18,19 @@ if [ -d "/addon_configs" ]; then
     
     # Change ownership to runner user to ensure write access
     # This is necessary because Home Assistant may mount the directory as root:root
+    # The container runs this script as root, allowing the chown to succeed
     if chown runner:runner /addon_configs 2>/dev/null; then
         bashio::log.info "Successfully changed /addon_configs ownership to runner:runner"
+        # Set permissions to 775 (owner+group can write, others can read)
+        if chmod 775 /addon_configs 2>/dev/null; then
+            bashio::log.info "Set /addon_configs permissions to 775"
+        else
+            bashio::log.warning "Could not set permissions to 775, but ownership change should be sufficient"
+        fi
     else
         # If chown fails, try to make directory world-writable as fallback
-        bashio::log.warning "Could not change ownership, attempting to set world-writable permissions..."
+        # Do NOT set 775 after this as it would override the 777 and break write access
+        bashio::log.warning "Could not change ownership, attempting to set world-writable permissions as fallback..."
         if chmod 777 /addon_configs 2>/dev/null; then
             bashio::log.warning "Set /addon_configs to 777 (world writable) as fallback"
         else
@@ -30,20 +38,13 @@ if [ -d "/addon_configs" ]; then
         fi
     fi
     
-    # Set permissions to 775 (owner+group can write, others can read)
-    if chmod 775 /addon_configs 2>/dev/null; then
-        bashio::log.info "Set /addon_configs permissions to 775"
-    else
-        bashio::log.warning "Could not set permissions to 775"
-    fi
-    
     # Log final state
     FINAL_OWNER=$(stat -c '%U:%G' /addon_configs 2>/dev/null || echo 'unknown')
     FINAL_PERMS=$(stat -c '%a' /addon_configs 2>/dev/null || echo 'unknown')
     bashio::log.info "/addon_configs ready - owner: ${FINAL_OWNER}, permissions: ${FINAL_PERMS}"
     
-    # Verify runner user can write
-    if su runner -c "test -w /addon_configs" 2>/dev/null; then
+    # Verify runner user can write (using su with explicit shell for proper user context)
+    if su -s /bin/sh runner -c "test -w /addon_configs" 2>/dev/null; then
         bashio::log.info "✓ Verified: runner user has write access to /addon_configs"
     else
         bashio::log.error "✗ Warning: runner user cannot write to /addon_configs - workflows may fail"
