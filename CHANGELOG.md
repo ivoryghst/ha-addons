@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.8.6] - 2025-12-03
+- **CRITICAL FIX**: Fixed /addon_configs write permission issue by changing ownership to runner user
+- Added `chown runner:runner /addon_configs` to ensure the runner user (uid=1000) can write
+- This resolves "Cannot write to /addon_configs" errors when directory is mounted as root:root (775 permissions)
+- Added comprehensive diagnostics: logs before/after state and verifies runner write access
+- Enhanced error handling with fallback to 777 permissions if chown fails
+- **Key difference from previous attempts**: Previous versions only used `chmod` which didn't work when directory was owned by root. This version uses `chown` to transfer ownership to the runner user.
+- **Why this won't revert**: The mapping `all_addon_configs:rw` is correct and unchanged. The ownership change is the missing piece that makes it work.
+
 ## [1.8.5] - 2025-12-01
 - **CRITICAL FIX**: Reverted mapping back to `all_addon_configs:rw` (was working in 1.7.1)
 - Version 1.8.2 incorrectly changed to `addon_configs:rw` which prevented Home Assistant from mounting the directory

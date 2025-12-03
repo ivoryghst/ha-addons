@@ -9,16 +9,46 @@ RUNNER_PID=""
 # Ensure /addon_configs is writable when mounted by Home Assistant
 # Home Assistant mounts all_addon_configs:rw at /addon_configs
 if [ -d "/addon_configs" ]; then
-    # Try to set permissions to 775 (owner+group can write, others can read)
-    # If that fails, fall back to 777 (all can write)
-    if chmod 775 /addon_configs 2>/dev/null; then
-        bashio::log.info "Set /addon_configs permissions to 775 (group writable)"
-    elif chmod 777 /addon_configs 2>/dev/null; then
-        bashio::log.warning "Set /addon_configs permissions to 777 (world writable)"
+    bashio::log.info "Configuring /addon_configs for runner user access..."
+    
+    # Log current state before changes
+    CURRENT_OWNER=$(stat -c '%U:%G' /addon_configs 2>/dev/null || echo 'unknown')
+    CURRENT_PERMS=$(stat -c '%a' /addon_configs 2>/dev/null || echo 'unknown')
+    bashio::log.info "Current state - owner: ${CURRENT_OWNER}, permissions: ${CURRENT_PERMS}"
+    
+    # Change ownership to runner user to ensure write access
+    # This is necessary because Home Assistant may mount the directory as root:root
+    if chown runner:runner /addon_configs 2>/dev/null; then
+        bashio::log.info "Successfully changed /addon_configs ownership to runner:runner"
     else
-        bashio::log.info "Could not modify /addon_configs permissions (may already be correct)"
+        # If chown fails, try to make directory world-writable as fallback
+        bashio::log.warning "Could not change ownership, attempting to set world-writable permissions..."
+        if chmod 777 /addon_configs 2>/dev/null; then
+            bashio::log.warning "Set /addon_configs to 777 (world writable) as fallback"
+        else
+            bashio::log.error "Failed to change ownership or permissions - workflows may not be able to write to /addon_configs"
+        fi
     fi
-    bashio::log.info "/addon_configs is ready (permissions: $(stat -c '%a' /addon_configs 2>/dev/null || echo 'unknown'))"
+    
+    # Set permissions to 775 (owner+group can write, others can read)
+    if chmod 775 /addon_configs 2>/dev/null; then
+        bashio::log.info "Set /addon_configs permissions to 775"
+    else
+        bashio::log.warning "Could not set permissions to 775"
+    fi
+    
+    # Log final state
+    FINAL_OWNER=$(stat -c '%U:%G' /addon_configs 2>/dev/null || echo 'unknown')
+    FINAL_PERMS=$(stat -c '%a' /addon_configs 2>/dev/null || echo 'unknown')
+    bashio::log.info "/addon_configs ready - owner: ${FINAL_OWNER}, permissions: ${FINAL_PERMS}"
+    
+    # Verify runner user can write
+    if su runner -c "test -w /addon_configs" 2>/dev/null; then
+        bashio::log.info "✓ Verified: runner user has write access to /addon_configs"
+    else
+        bashio::log.error "✗ Warning: runner user cannot write to /addon_configs - workflows may fail"
+        bashio::log.error "  This may indicate a configuration issue with Home Assistant's volume mounting"
+    fi
 fi
 
 # Graceful shutdown handler
